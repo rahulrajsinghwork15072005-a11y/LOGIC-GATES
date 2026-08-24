@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Logic Forge — Digital Circuit Simulator</title>
+    <meta name="description" content="Logic Forge — browser-based digital logic simulator: switches, gates, LEDs, 7-seg, clocks. Fixed-point propagation, oscillator detection. By Rahul Raj Singh.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="lab.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Boogaloo&family=Space+Grotesk:wght@300;400;500;600;700&family=Pixelify+Sans:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Glitter + bg canvases (Y2K chrome) -->
+    <canvas id="glitterCanvas"></canvas>
+    <canvas id="bgCanvas"></canvas>
+    <div class="y2k-bg-pattern"></div>
+    <div class="y2k-grid"></div>
+
+    <!-- Keyboard shortcuts modal -->
+    <div class="modal-overlay hidden" id="kbdModal">
+        <div class="kbd-modal">
+            <button class="kbd-modal-close" id="kbdModalClose">✕</button>
+            <h2>⌨ Logic Forge Shortcuts</h2>
+            <div class="kbd-row"><span>Place Switch / Clock / HIGH / LOW</span><span class="kbd-key">1 / 2 / 3 / 4</span></div>
+            <div class="kbd-row"><span>AND / OR / NOT / LED</span><span class="kbd-key">A / O / N / L</span></div>
+            <div class="kbd-row"><span>Wire mode</span><span class="kbd-key">W</span></div>
+            <div class="kbd-row"><span>Select mode</span><span class="kbd-key">S</span></div>
+            <div class="kbd-row"><span>Delete selected</span><span class="kbd-key">Del / Backspace</span></div>
+            <div class="kbd-row"><span>Cancel wire</span><span class="kbd-key">Esc</span></div>
+            <div class="kbd-row"><span>Toggle dark mode</span><span class="kbd-key">D</span></div>
+            <div class="kbd-row"><span>Save / Load</span><span class="kbd-key">Save / Load buttons</span></div>
+            <div class="kbd-row"><span>Show this panel</span><span class="kbd-key">?</span></div>
+            <div class="kbd-row"><span>Close modal</span><span class="kbd-key">Esc</span></div>
+        </div>
+    </div>
+
+    <!-- Marquee ticker -->
+    <div class="ticker-wrap" aria-hidden="true">
+        <div class="ticker-content">
+            <span>✦ Logic Forge by Rahul Raj Singh ✦</span>
+            <span class="ticker-star">★</span>
+            <span>FIXED-POINT PROPAGATION</span>
+            <span class="ticker-star">★</span>
+            <span>AND · OR · NOT · NAND · NOR · XOR · XNOR · BUF</span>
+            <span class="ticker-star">★</span>
+            <span>OSCILLATOR DETECTION</span>
+            <span class="ticker-star">★</span>
+            <span>CLOCK · 7-SEGMENT · SWITCH</span>
+            <span class="ticker-star">★</span>
+            <span>ZOOM / PAN · SAVE / LOAD</span>
+            <span class="ticker-star">★</span>
+            <!-- dup -->
+            <span>✦ Logic Forge by Rahul Raj Singh ✦</span>
+            <span class="ticker-star">★</span>
+            <span>FIXED-POINT PROPAGATION</span>
+            <span class="ticker-star">★</span>
+            <span>AND · OR · NOT · NAND · NOR · XOR · XNOR · BUF</span>
+            <span class="ticker-star">★</span>
+            <span>OSCILLATOR DETECTION</span>
+            <span class="ticker-star">★</span>
+        </div>
+    </div>
+
+    <nav class="cyber-nav">
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-bolt"></i></div>
+                <span class="logo-text">LOGIC<span class="accent"> Forge</span></span>
+            </div>
+            <div class="nav-links">
+                <a href="#concepts"><i class="fas fa-microchip"></i> Concepts</a>
+                <a href="#simulator"><i class="fas fa-flask"></i> Simulator</a>
+                <a href="#library"><i class="fas fa-book"></i> Library</a>
+                <a href="#truth"><i class="fas fa-table"></i> Truth Tables</a>
+                <a href="#architecture"><i class="fas fa-layer-group"></i> Architecture</a>
+            </div>
+            <button class="dark-toggle" id="darkToggle">🌙 Dark</button>
+            <span class="kbd-badge" id="kbdOpenBtn" title="Keyboard shortcuts">⌨ ?</span>
+            <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
+        </div>
+        <div class="mobile-nav" id="mobileNav">
+            <a href="#concepts">Concepts</a>
+            <a href="#simulator">Simulator</a>
+            <a href="#library">Library</a>
+            <a href="#truth">Truth Tables</a>
+            <a href="#architecture">Architecture</a>
+        </div>
+    </nav>
+
+    <main>
+        <!-- HERO -->
+        <section class="hero">
+            <div class="hero-particles" aria-hidden="true">
+                <div class="y2k-star">✦</div>
+                <div class="y2k-star">★</div>
+                <div class="y2k-star">✧</div>
+                <div class="y2k-star">✶</div>
+                <div class="y2k-star">✸</div>
+            </div>
+            <div class="hero-content">
+                <div class="badge"><span class="badge-dot"></span> created by Rahul Raj Singh</div>
+                <h1 class="hero-title">
+                    <span class="title-line accent-line" style="--d:1">LOGIC</span>
+                    <span class="title-line dim-line" style="--d:2">FORGE II✦</span>
+                </h1>
+                <p class="hero-sub">
+                    Drop switches, gates and outputs on an infinite canvas, wire them, and watch <strong>1/0 signals flow in real time</strong> — including clocks and oscillator detection.<br>
+                    <span class="mono-text">fixed-point propagation · graph = Map(nodes) + Array(edges) · 7-seg decoder</span>
+                </p>
+                <div class="hero-cta">
+                    <a href="#simulator" class="cta-primary"><i class="fas fa-play"></i> Open Simulator</a>
+                    <a href="#concepts" class="cta-secondary"><i class="fas fa-bolt"></i> How it Works</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-pill"><span class="stat-num">13</span><span class="stat-label">Component Types</span></div>
+                    <div class="stat-pill"><span class="stat-num">∞</span><span class="stat-label">Canvas</span></div>
+                    <div class="stat-pill"><span class="stat-num">6</span><span class="stat-label">Example Circuits</span></div>
+                </div>
+            </div>
+            <div class="hero-terminal">
+                <div class="terminal-bar">
+                    <span class="t-dot red"></span><span class="t-dot yellow"></span><span class="t-dot green"></span>
+                    <span class="t-title">logic-forge_rahul</span>
+                </div>
+                <div class="terminal-body" id="heroTerminal"></div>
+            </div>
+        </section>
+
+        <div class="token-strip" aria-hidden="true">
+            <div class="token-strip-inner">
+                <span class="token-chip-strip"><span class="kw">SWITCH</span> → <span class="op">AND</span> → <span class="num">LED</span> · propagations settle in <span class="kw">O(n·iter)</span></span>
+                <span class="token-chip-strip">OSCILLATOR → cap = n·6+20 passes · real feedback failure mode ✦</span>
+                <span class="token-chip-strip">WORLD ↔ SCREEN · zoom/pan · snap(16) · dual-canvas layers</span>
+                <span class="token-chip-strip"><span class="kw">7-SEG</span> bits(7) → digit pattern lookup · bitmask decode</span>
+                <!-- dup -->
+                <span class="token-chip-strip"><span class="kw">SWITCH</span> → <span class="op">AND</span> → <span class="num">LED</span> · propagations settle in <span class="kw">O(n·iter)</span></span>
+                <span class="token-chip-strip">OSCILLATOR → cap = n·6+20 passes · real feedback failure mode ✦</span>
+                <span class="token-chip-strip">WORLD ↔ SCREEN · zoom/pan · snap(16) · dual-canvas layers</span>
+                <span class="token-chip-strip"><span class="kw">7-SEG</span> bits(7) → digit pattern lookup · bitmask decode</span>
+            </div>
+        </div>
+
+        <!-- CONCEPTS -->
+        <section id="concepts" class="section-container">
+            <div class="section-header">
+                <div class="section-tag">01 — CORE IDEA</div>
+                <h2 class="section-title"><span class="bracket">〈</span> HOW IT WORKS <span class="bracket">〉</span></h2>
+                <p class="section-desc">Graph = <code>Map</code> of nodes + array of edges. Simulate by <strong>fixed-point iteration</strong> until stable — or flag oscillation.</p>
+            </div>
+            <div class="phases-timeline">
+                <div class="phase-card">
+                    <div class="phase-num">CONCEPT 01</div>
+                    <span class="phase-icon">🔁</span>
+                    <h3>Fixed-Point Propagation</h3>
+                    <p>Reset non-source gates to <code>false</code>. Repeatedly <code>evalComp(c)</code> for every node. If any output flips, loop again. Stop when a full pass makes zero changes — the circuit has settled.</p>
+                    <span class="phase-tag">propagate() · O(n×iter)</span>
+                </div>
+                <div class="phase-card">
+                    <div class="phase-num">CONCEPT 02</div>
+                    <span class="phase-icon">⚠</span>
+                    <h3>Oscillator / Feedback</h3>
+                    <p>If it never settles within <code>6·n+20</code> passes, it's an oscillator (e.g. NOT loop, illegal SR latch). Flag <code>oscDetected</code> and show warning instead of hanging.</p>
+                    <span class="phase-tag">feedback · real hardware failure</span>
+                </div>
+                <div class="phase-card">
+                    <div class="phase-num">CONCEPT 03</div>
+                    <span class="phase-icon">🕸</span>
+                    <h3>Graph Model</h3>
+                    <p><code>components: Map(id→comp)</code> are nodes; <code>wires: {from:{id,port}, to:{id,port}}</code> are edges. <code>getInput(id,port)</code> follows the wire back to its source's <code>.state</code>.</p>
+                    <span class="phase-tag">Map + array · getInput</span>
+                </div>
+                <div class="phase-card">
+                    <div class="phase-num">CONCEPT 04</div>
+                    <span class="phase-icon">📐</span>
+                    <h3>World ↔ Screen</h3>
+                    <p><code>worldToScreen / screenToWorld</code> apply <code>zoom, panX, panY</code>. <code>snap(16)</code> quantises placement. Two stacked canvases (components + wires) keep redraws cheap.</p>
+                    <span class="phase-tag">pan/zoom · dual-canvas</span>
+                </div>
+                <div class="phase-card">
+                    <div class="phase-num">CONCEPT 05</div>
+                    <span class="phase-icon">🔢</span>
+                    <h3>7-Segment Decoder</h3>
+                    <p>Read 7 input bits, pack into an integer via bit shifts (<code>bits.reduce(|)</code>), look up <code>SEG_PATTERNS</code> (maps digits 0-9 to segment on/off).</p>
+                    <span class="phase-tag">bitmask · hardware decoder</span>
+                </div>
+                <div class="phase-card">
+                    <div class="phase-num">CONCEPT 06</div>
+                    <span class="phase-icon">⏱</span>
+                    <h3>Clocks & Sequential</h3>
+                    <p>Clock toggles <code>.state</code> on interval <code>1000/Hz/2</code> ms. Each tick triggers <code>propagate()</code> so downstream gates — including feedback latches — update like real sequential logic.</p>
+                    <span class="phase-tag">clockHz · setInterval</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SIMULATOR LAB -->
+        <section id="simulator" class="section-container">
+            <div class="section-header">
+                <div class="section-tag">02 — INTERACTIVE LAB</div>
+                <h2 class="section-title"><span class="bracket">⎡</span> SIMULATOR <span class="bracket">⎦</span></h2>
+                <p class="section-desc">Click canvas to place · drag ports to wire · right-click delete · alt+drag to pan · scroll to zoom.</p>
+            </div>
+
+            <div class="lab-container">
+                <div class="lab-header">
+                    <i class="fas fa-flask"></i> Logic Forge Lab
+                    <span class="lab-badge" style="margin-left:auto">Y2K ENGINE</span>
+                </div>
+
+                <!-- Simulator chrome -->
+                <div class="sim-toolbar">
+                    <button class="tool-btn" id="tb-wire" onclick="setMode('wire')">WIRE [W]</button>
+                    <button class="tool-btn" id="tb-select" onclick="setMode('select')">SELECT [S]</button>
+                    <button class="tool-btn" onclick="deleteSelected()">DELETE [Del]</button>
+                    <button class="tool-btn" onclick="clearAll()">CLEAR</button>
+                    <button class="tool-btn" onclick="saveCircuit()">SAVE</button>
+                    <button class="tool-btn" onclick="loadCircuit()">LOAD</button>
+                    <button class="tool-btn" onclick="exportJSON()"><i class="fas fa-file-code"></i> JSON</button>
+                    <button class="tool-btn" onclick="exportSVG()"><i class="fas fa-file-image"></i> SVG</button>
+                    <div class="sim-status stopped" id="sim-status">● IDLE</div>
+                </div>
+
+                <div class="sim-toolbar" style="margin-top:8px">
+                    <button class="tool-btn" onclick="loadExample('half_adder')">HALF ADDER</button>
+                    <button class="tool-btn" onclick="loadExample('sr_latch')">SR LATCH</button>
+                    <button class="tool-btn" onclick="loadExample('clock_led')">CLOCK+LED</button>
+                    <button class="tool-btn" onclick="loadExample('full_adder')">FULL ADDER</button>
+                    <button class="tool-btn" onclick="loadExample('seg7_demo')">7-SEG DEMO</button>
+                    <button class="tool-btn" onclick="loadExample('mux_2to1')">MUX 2:1</button>
+                    <button class="tool-btn" onclick="loadExample('oscillator')">OSCILLATOR</button>
+                </div>
+
+                <div class="simulator-layout" style="margin-top:14px">
+                    <div class="left-panel">
+                        <div class="lp-sec">
+                            <div class="lp-h">INPUTS</div>
+                            <div class="comp-list">
+                                <div class="comp-btn sel" id="cb-switch" data-type="switch" onclick="selComp('switch')"><span class="comp-icon">⏻</span><span class="comp-name">Switch</span><span class="comp-key">1</span></div>
+                                <div class="comp-btn" id="cb-clock" data-type="clock" onclick="selComp('clock')"><span class="comp-icon">⏱</span><span class="comp-name">Clock</span><span class="comp-key">2</span></div>
+                                <div class="comp-btn" id="cb-const1" data-type="const1" onclick="selComp('const1')"><span class="comp-icon">1</span><span class="comp-name">HIGH</span><span class="comp-key">3</span></div>
+                                <div class="comp-btn" id="cb-const0" data-type="const0" onclick="selComp('const0')"><span class="comp-icon">0</span><span class="comp-name">LOW</span><span class="comp-key">4</span></div>
+                            </div>
+                        </div>
+                        <div class="lp-sec">
+                            <div class="lp-h">GATES</div>
+                            <div class="comp-list">
+                                <div class="comp-btn" id="cb-and" data-type="and" onclick="selComp('and')"><span class="comp-icon">∧</span><span class="comp-name">AND</span><span class="comp-key">A</span></div>
+                                <div class="comp-btn" id="cb-or" data-type="or" onclick="selComp('or')"><span class="comp-icon">∨</span><span class="comp-name">OR</span><span class="comp-key">O</span></div>
+                                <div class="comp-btn" id="cb-not" data-type="not" onclick="selComp('not')"><span class="comp-icon">¬</span><span class="comp-name">NOT</span><span class="comp-key">N</span></div>
+                                <div class="comp-btn" id="cb-nand" data-type="nand" onclick="selComp('nand')"><span class="comp-icon">⊼</span><span class="comp-name">NAND</span></div>
+                                <div class="comp-btn" id="cb-nor" data-type="nor" onclick="selComp('nor')"><span class="comp-icon">⊽</span><span class="comp-name">NOR</span></div>
+                                <div class="comp-btn" id="cb-xor" data-type="xor" onclick="selComp('xor')"><span class="comp-icon">⊕</span><span class="comp-name">XOR</span></div>
+                                <div class="comp-btn" id="cb-xnor" data-type="xnor" onclick="selComp('xnor')"><span class="comp-icon">⊙</span><span class="comp-name">XNOR</span></div>
+                                <div class="comp-btn" id="cb-buf" data-type="buf" onclick="selComp('buf')"><span class="comp-icon">▷</span><span class="comp-name">BUFFER</span></div>
+                            </div>
+                        </div>
+                        <div class="lp-sec">
+                            <div class="lp-h">OUTPUTS</div>
+                            <div class="comp-list">
+                                <div class="comp-btn" id="cb-led" data-type="led" onclick="selComp('led')"><span class="comp-icon">◉</span><span class="comp-name">LED</span><span class="comp-key">L</span></div>
+                                <div class="comp-btn" id="cb-seg7" data-type="seg7" onclick="selComp('seg7')"><span class="comp-icon">7</span><span class="comp-name">7-Segment</span></div>
+                                <div class="comp-btn" id="cb-probe" data-type="probe" onclick="selComp('probe')"><span class="comp-icon">⊡</span><span class="comp-name">Probe</span></div>
+                            </div>
+                        </div>
+                        <div class="lp-sec">
+                            <div class="lp-h">CLOCK SPEED</div>
+                            <div class="clock-ctrl">
+                                <button class="clock-btn active" id="clk-500" onclick="setClockHz(0.5)">0.5Hz</button>
+                                <button class="clock-btn" id="clk-1000" onclick="setClockHz(1)">1Hz</button>
+                                <button class="clock-btn" id="clk-2000" onclick="setClockHz(2)">2Hz</button>
+                                <button class="clock-btn" id="clk-5000" onclick="setClockHz(5)">5Hz</button>
+                            </div>
+                        </div>
+                        <div class="lp-sec">
+                            <div class="lp-h">SELECTED</div>
+                            <div class="prop-panel" id="prop-panel">Nothing selected</div>
+                        </div>
+                        <div class="lp-sec" style="flex:1">
+                            <div class="lp-h">SIM LOG</div>
+                            <div class="sim-log" id="sim-log"></div>
+                        </div>
+                    </div>
+
+                    <div id="canvas-wrap">
+                        <canvas id="wire-canvas"></canvas>
+                        <canvas id="main-canvas"></canvas>
+                        <div id="osc-warn">⚠ OSCILLATOR / FEEDBACK LOOP DETECTED</div>
+                        <div id="zoom-ind">100%</div>
+                    </div>
+                </div>
+
+                <!-- SVG preview (Viz) -->
+                <div id="preview-svg" class="lab-svg-wrap" style="display:none"></div>
+            </div>
+        </section>
+
+        <!-- LIBRARY -->
+        <section id="library" class="section-container">
+            <div class="section-header">
+                <div class="section-tag">03 — EXAMPLES</div>
+                <h2 class="section-title"><span class="bracket">⟦</span> CIRCUIT LIBRARY <span class="bracket">⟧</span></h2>
+                <p class="section-desc">Pre-built circuits demonstrating combinational, sequential and intentional oscillator cases. Click any card to load it in the simulator above.</p>
+            </div>
+            <div id="libraryGrid" class="phases-timeline"></div>
+        </section>
+
+        <!-- TRUTH TABLES -->
+        <section id="truth" class="section-container">
+            <div class="section-header">
+                <div class="section-tag">04 — REFERENCE</div>
+                <h2 class="section-title"><span class="bracket">⦅</span> TRUTH TABLES <span class="bracket">⦆</span></h2>
+                <p class="section-desc">Every gate's truth table implemented in <code>LogicEngine.evalComp()</code> — XSS-safe rendering via <code>Viz.esc()</code> — proven by Node unit tests.</p>
+            </div>
+            <div id="truthTables" class="truth-grid"></div>
+        </section>
+
+        <!-- ARCHITECTURE -->
+        <section id="architecture" class="section-container">
+            <div class="section-header">
+                <div class="section-tag">05 — FAANG-LEVEL DESIGN</div>
+                <h2 class="section-title"><span class="bracket">⧩</span> ARCHITECTURE <span class="bracket">⧩</span></h2>
+                <p class="section-desc">Single-file 762-line prototype refactored to modular UMD + Worker + Viz + library + tests — same pattern as Compiler Forge.</p>
+            </div>
+            <div class="deep-card">
+                <h3><i class="fas fa-sitemap"></i> Module Map</h3>
+                <pre class="code-block" style="font-size:.82rem; line-height:1.7; white-space:pre-wrap;"> index.html  → loads style.css + lab.css (Y2K)
+            ↳ logic-engine.js  (UMD: browser / Worker / Node)  — CDEFS, truth tables, getPortPos, getInput, evalComp, propagate (fixed-point), oscillator cap, SEG_PATTERNS, setOf/addAll
+            ↳ logic-worker.js  (Web Worker) — importScripts(logic-engine.js), onmessage {propagate|tick|eval|ping} with fallback
+            ↳ viz.js           (UMD) — esc() XSS-safe, buildGateSVG / buildWireSVG / buildSeg7SVG / buildCircuitSVG
+            ↳ logic-library.js (UMD) — circuits: half_adder · sr_latch · clock_led · full_adder · seg7_demo · mux_2to1 · oscillator
+            ↳ app-integration.js — Worker lifecycle + simulateInWorker / simulateMainThread / propagateAsync + loadExampleAsync
+            ↳ script.js        — canvas, dual-layer drawing, world↔screen, snap, drag/pan/zoom, wire validation, clock, save/load, keyboard, init
+ tests/run-tests.js → logic-engine.test.js + viz.test.js (Node assert, proof of truth tables + propagation)
+</pre>
+            </div>
+            <div class="deep-card">
+                <h3><i class="fas fa-file-code"></i> File-by-File (mirrors Compiler Forge README)</h3>
+                <div style="font-family:var(--font-pixel); font-size:.84rem; line-height:1.9; color:var(--text-muted)">
+                    <strong style="color:var(--hot-pink)">logic-engine.js</strong> — Single source of truth for simulation. Exports <code>CDEFS</code> catalogue, <code>evalComp</code> truth tables (AND→every, OR→some, NOT→!, NAND/NOR negations, XOR→!==, XNOR→===, BUF), <code>getInput</code> (finds wire by <code>to.id/port</code> and returns source state), <code>getPortPos</code> (out on right, ins distributed down left), <code>propagate</code> (reset non-sources → loop recompute until stable or <code>MAX=n*6+20</code> → oscillator), clock helpers, 7-seg decoder, setOf/addAll, UMD wrapper.<br>
+                    <strong style="color:var(--hot-pink)">logic-worker.js</strong> — Offloads heavy propagation. <code>importScripts('logic-engine.js')</code> with try/catch fallback. <code>onmessage</code> handles <code>propagate/tick/eval/ping</code>; serialises <code>Map→Array</code> for postMessage; timeout fallback to main thread.<br>
+                    <strong style="color:var(--hot-pink)">viz.js</strong> — XSS-safe SVG. <code>esc()</code> escapes HTML. <code>buildGateSVG</code> draws gate body+symbol+ports, <code>buildWireSVG</code> draws bezier with glow for HIGH, <code>buildSeg7SVG</code> draws 7 bars, <code>buildCircuitSVG</code> composes full circuit snapshot for export.<br>
+                    <strong style="color:var(--hot-pink)">logic-library.js</strong> — Declarative circuits. Each entry has <code>name, description, comps[], wires[]</code> plus <code>build(ctx)</code> that calls <code>createComp/addWire</code>. Helpers <code>get/list/injectExample/instantiate</code> mirror <code>grammar-library.js</code>.<br>
+                    <strong style="color:var(--hot-pink)">app-integration.js</strong> — Bridges UI↔engine↔worker. <code>initWorker</code> creates Worker if not <code>file:</code>, wires <code>onmessage</code> to promise map, <code>simulateInWorker</code> with 2.5s timeout fallback, <code>propagateAsync</code> patches UI states back, <code>loadExampleAsync</code> via LogicLibrary + LogicEngine.<br>
+                    <strong style="color:var(--hot-pink)">script.js</strong> — The lab. Dual canvases, grid dots, snap(16), pan/zoom, port hit-testing (<code>Math.hypot</code>), drag, pendingWire bezier, clock interval, prop panel, sim log (cap 50), save/load localStorage + JSON/SVG export, keyboard (1/A/O/N/L/W/S/Del/Esc), START overlay, Y2K chrome (glitter, bgCanvas, ticker, dark toggle). Uses <code>LogicEngine</code> if present, inline fallback otherwise.<br>
+                    <strong style="color:var(--hot-pink)">index.html / style.css / lab.css</strong> — Y2K maximalist shell (glitterCanvas, bgCanvas, ticker, cyber-nav, hero with terminal typewriter, token-strip, section-containers, lab flex layout). <code>style.css</code> (from Compiler Forge) holds theme; <code>lab.css</code> holds simulator layout (left-panel, canvas-wrap, comp-btn, osc-warn, tip).<br>
+                    <strong style="color:var(--hot-pink)">tests/</strong> — Node assert proofs: <code>logic-engine.test.js</code> checks UMD, CDEFS, setOf/addAll, snap, port positions, truth tables exhaustive, getInput, propagation (switch→LED, gate chains, feedback SR latch stable, NOT-loop oscillator), 7-seg, clock; <code>viz.test.js</code> checks XSS-safe esc and SVG builders.<br>
+                </div>
+            </div>
+            <div class="deep-card">
+                <h3><i class="fas fa-comment-dots"></i> Interview Guide (like Compiler Forge)</h3>
+                <div style="font-family:var(--font-pixel); font-size:.84rem; line-height:1.8; color:var(--text-muted)">
+                    <strong>30-sec pitch:</strong> “Logic Forge is a digital-circuit simulator. You place gates on an infinite pan/zoom canvas, wire ports, and a propagation engine settles signals by repeatedly evaluating every gate until stable — fixed-point iteration with a safety cap. If it never settles I flag an oscillator, which is exactly how real hardware fails.”<br><br>
+                    <strong>Q: How do you simulate?</strong> A: Graph of Map nodes + Array edges. Reset non-sources to false, then loop <code>evalComp</code> for each node until a full sweep makes no change. Handles ripple without topological sort; detects feedback via iteration cap.<br>
+                    <strong>Q: Feedback?</strong> A: Cap ≈ <code>6·n+20</code>. If still flipping at cap → <code>oscDetected</code>. Example: NOT output→input never settles; SR NOR latch wired illegally oscillates.<br>
+                    <strong>Q: Why two canvases?</strong> A: Wires change every propagate (glow on HIGH), components rarely move; separate layers avoid repainting everything.<br>
+                    <strong>Q: Scale to thousands of gates?</strong> A: Current is O(n·iter) fine for hundreds. At scale switch to event-driven work queue (only re-evaluate gates whose inputs changed) — like Verilog simulators.<br>
+                    <strong>Q: Clock?</strong> A: Source toggles on <code>setInterval(1000/Hz/2)</code>; each toggle calls <code>propagate()</code> so downstream sequential logic updates.<br>
+                    <strong>Q: UMD/Worker?</strong> A: Every engine module uses <code>(function(root,factory){...})</code> wrapper so it works as <code>window.LogicEngine</code>, <code>self.LogicEngine</code> in Worker via <code>importScripts</code>, and <code>require()</code> in Node for tests.<br>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Overlay (start screen, like original v2) -->
+    <div id="overlay">
+        <h1>LOGIC FORGE II</h1>
+        <p>CLOCK · 7-SEGMENT · ZOOM/PAN · SAVE/LOAD · GATE DELAY</p>
+        <p style="color:#999">CLICK CANVAS TO PLACE · DRAG PORTS TO WIRE · RIGHT-CLICK DELETE</p>
+        <button class="big-btn" onclick="init()">START</button>
+    </div>
+    <div id="tip"></div>
+
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <footer class="cyber-footer">
+        <div class="footer-content">
+            <div class="footer-logo">LOGIC<span class="accent">Forge</span> by Rahul Raj Singh</div>
+            <p style="color:#888; font-family:var(--font-pixel); margin: .5rem 0 1rem;">Fixed-point propagation · Oscillator detection · Y2K maximalist · UMD engine</p>
+        </div>
+        <div class="footer-links">
+            <a href="https://github.com/rahulrajsinghwork15072005-a11y/LOGIC-GATES" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i> GitHub</a>
+            <a href="https://github.com/rahulrajsinghwork15072005-a11y" target="_blank" rel="noopener noreferrer"><i class="fas fa-user"></i> Profile</a>
+            <a href="mailto:rahulrajsingh.work.15072005@gmail.com"><i class="fas fa-envelope"></i> Email</a>
+        </div>
+        <div class="footer-tags" style="margin-top:1.2rem">
+            <span>LOGIC</span><span>AND</span><span>OR</span><span>NOT</span><span>XOR</span><span>LED</span><span>7-SEG</span><span>CLOCK</span>
+        </div>
+    </footer>
+
+    <!-- Core engine: UMD modules (browser/Worker/Node) -->
+    <script src="logic-engine.js"></script>
+    <script src="logic-library.js"></script>
+    <script src="viz.js"></script>
+    <script src="app-integration.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

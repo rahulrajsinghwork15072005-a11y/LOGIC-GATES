@@ -1,0 +1,325 @@
+/* lab.css — Logic Forge Lab specific styles (Y2K maximalist + engineering retro) */
+.lab-container {
+  background: var(--card-bg);
+  border: var(--border-thick);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-hard);
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+.lab-header {
+  font-family: var(--font-bubble);
+  font-size: 1.7rem;
+  color: var(--hot-pink);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.lab-header .lab-badge {
+  font-family: var(--font-pixel);
+  font-size: 0.7rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-pill);
+  border: 2px solid #0A0014;
+  background: var(--electric-lime);
+  color: #0A0014;
+}
+
+/* ── Simulator layout ── */
+.simulator-layout {
+  display: flex;
+  min-height: 520px;
+  border: var(--border-thick);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #0A0014;
+  box-shadow: var(--shadow-hard);
+}
+
+.left-panel {
+  width: 210px;
+  background: #111;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
+  border-right: 3px solid #000;
+  max-height: 640px;
+}
+
+.lp-sec {
+  padding: 10px 10px 12px;
+  border-bottom: 1px solid #222;
+}
+.lp-h {
+  font-family: 'Boogaloo', cursive;
+  font-size: 13px;
+  letter-spacing: 1.8px;
+  color: #555;
+  margin-bottom: 7px;
+  text-transform: uppercase;
+}
+
+/* Component palette buttons */
+.comp-list { display: flex; flex-direction: column; gap: 4px; }
+.comp-btn {
+  background: #0d0d0d;
+  border: 2px solid #222;
+  color: #777;
+  font-family: 'VT323', monospace;
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: all .12s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 6px;
+  text-align: left;
+}
+.comp-btn:hover { border-color: #555; color: #ccc; transform: translate(-1px,-1px); box-shadow: 2px 2px 0 #000; }
+.comp-btn.sel { border-color: var(--electric-lime); color: var(--electric-lime); background: #0a1a0a; box-shadow: 2px 2px 0 var(--electric-lime); }
+.comp-icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
+.comp-name { flex: 1; font-family: 'VT323', monospace; }
+.comp-key { font-size: 9px; color: #333; background: #1a1a1a; padding: 1px 5px; border-radius: 3px; border: 1px solid #222; }
+
+/* Clock speed */
+.clock-ctrl { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.clock-btn {
+  background: #0d0d0d;
+  border: 1.5px solid #222;
+  color: #555;
+  font-family: 'VT323', monospace;
+  font-size: 10px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all .12s;
+  border-radius: 6px;
+}
+.clock-btn:hover, .clock-btn.active { border-color: var(--electric-lime); color: var(--electric-lime); background: #0a1a0a; }
+
+/* Properties & log */
+.prop-panel {
+  background: #0a0a0a;
+  border: 1.5px solid #222;
+  padding: 8px 10px;
+  font-size: 11px;
+  color: #555;
+  border-radius: 6px;
+  font-family: 'VT323', monospace;
+  line-height: 1.5;
+}
+.prop-row { display: flex; justify-content: space-between; margin-bottom: 4px; gap: 8px; }
+.prop-val { color: #aaa; }
+
+.sim-log {
+  font-family: 'VT323', monospace;
+  font-size: 11px;
+  color: #333;
+  line-height: 1.6;
+  max-height: 140px;
+  overflow-y: auto;
+  background: #0a0a0a;
+  border: 1.5px solid #222;
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+.sim-log .on { color: var(--electric-lime); }
+.sim-log .err { color: #ff2d5e; }
+
+/* ── Canvas area ── */
+#canvas-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #f0ebe0;
+  cursor: crosshair;
+  min-height: 520px;
+}
+#main-canvas, #wire-canvas {
+  position: absolute;
+  top: 0; left: 0;
+  display: block;
+}
+#wire-canvas { pointer-events: none; z-index: 3; }
+#main-canvas { z-index: 2; }
+
+/* Oscillator warning */
+#osc-warn {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, #dc2626, #ff2d9b);
+  color: #fff;
+  font-family: 'VT323', monospace;
+  font-size: 11px;
+  padding: 6px 16px;
+  pointer-events: none;
+  z-index: 20;
+  display: none;
+  letter-spacing: 1px;
+  border: 2px solid #0A0014;
+  border-radius: 999px;
+  box-shadow: 4px 4px 0 #0A0014;
+  white-space: nowrap;
+}
+
+/* Zoom indicator */
+#zoom-ind {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(0,0,0,0.72);
+  color: #888;
+  font-family: 'VT323', monospace;
+  font-size: 11px;
+  padding: 4px 10px;
+  pointer-events: none;
+  z-index: 10;
+  border: 1.5px solid #333;
+  border-radius: 6px;
+}
+
+/* Toolbar below canvas (mobile + desktop actions) */
+.sim-toolbar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding: 10px;
+  background: #0A0014;
+  border: var(--border-thick);
+  border-color: var(--y2k-purple);
+  border-radius: var(--radius-md);
+}
+.tool-btn {
+  background: transparent;
+  border: 1.5px solid #444;
+  color: #888;
+  font-family: 'VT323', monospace;
+  font-size: 11px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all .12s;
+  letter-spacing: 0.8px;
+  white-space: nowrap;
+  border-radius: 6px;
+}
+.tool-btn:hover { border-color: #fff; color: #fff; transform: translate(-1px,-1px); box-shadow: 2px 2px 0 #000; }
+.tool-btn.active { background: #fff; color: #000; border-color: #fff; }
+.tool-btn.danger { border-color: #dc2626; color: #ff6b7a; }
+.tool-btn.danger:hover { background: #dc2626; color: #fff; }
+.tool-btn.primary { background: var(--hot-pink); border-color: #0A0014; color: #fff; box-shadow: 2px 2px 0 #0A0014; }
+.tool-btn.primary:hover { background: var(--electric-lime); color: #0A0014; }
+
+.sim-status {
+  font-family: 'VT323', monospace;
+  font-size: 11px;
+  padding: 5px 12px;
+  border: 1.5px solid;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+.sim-status.running { color: var(--electric-lime); border-color: var(--electric-lime); background: rgba(204,255,0,0.08); }
+.sim-status.stopped { color: #555; border-color: #333; background: rgba(255,255,255,0.02); }
+
+/* Overlay (start screen) */
+#overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(240,235,224,0.96);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  flex-direction: column;
+  gap: 14px;
+  backdrop-filter: blur(2px);
+}
+#overlay h1 {
+  font-family: 'Boogaloo', cursive;
+  font-size: 48px;
+  color: #0A0014;
+  letter-spacing: 3px;
+  text-shadow: 3px 3px 0 var(--hot-pink);
+}
+#overlay p { color: #555; font-family: 'VT323', monospace; font-size: 12px; letter-spacing: 1.8px; text-align: center; }
+.big-btn {
+  font-family: 'Boogaloo', cursive;
+  font-size: 18px;
+  padding: 12px 40px;
+  background: #0A0014;
+  border: 3px solid #0A0014;
+  color: #fff;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: all .18s;
+  border-radius: 999px;
+  box-shadow: 6px 6px 0 var(--hot-pink);
+}
+.big-btn:hover { background: var(--hot-pink); color: #fff; border-color: #0A0014; transform: translate(-2px,-2px); box-shadow: 8px 8px 0 #0A0014; }
+
+/* Tooltip */
+#tip {
+  position: fixed;
+  background: #0A0014;
+  color: #ccc;
+  font-family: 'VT323', monospace;
+  font-size: 11px;
+  padding: 6px 10px;
+  border: 1.5px solid #333;
+  pointer-events: none;
+  z-index: 200;
+  display: none;
+  line-height: 1.5;
+  border-radius: 6px;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+  white-space: pre-line;
+}
+
+/* SVG preview wrapper */
+.lab-svg-wrap {
+  background: #0A0014;
+  border: var(--border-thick);
+  border-color: var(--y2k-purple);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  overflow-x: auto;
+  box-shadow: 5px 5px 0 var(--y2k-purple);
+  margin-top: 1rem;
+}
+.lab-svg-wrap:empty { display: none; }
+
+/* Truth table quick styles */
+.truth-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+  margin-top: 1rem;
+}
+.truth-card {
+  background: #0A0014;
+  border: 2px solid var(--y2k-purple);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: 'VT323', monospace;
+}
+.truth-card h5 { color: var(--electric-lime); font-size: 13px; margin-bottom: 4px; letter-spacing: 1px; }
+.truth-card pre { color: #ccc; font-size: 11px; line-height: 1.4; margin: 0; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .simulator-layout { flex-direction: column; }
+  .left-panel { width: 100%; flex-direction: row; flex-wrap: wrap; max-height: none; overflow: visible; }
+  .lp-sec { flex: 1 1 160px; min-width: 140px; }
+  #canvas-wrap { min-height: 420px; }
+}

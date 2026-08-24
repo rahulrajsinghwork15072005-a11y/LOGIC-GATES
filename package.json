@@ -1,0 +1,16 @@
+{
+  "name": "logic-forge",
+  "version": "2.0.0",
+  "description": "Logic Forge — digital logic circuit simulator: 13 component types, fixed-point propagation (like FIRST/FOLLOW), oscillator detection, graph Map+Array, world↔screen, 7-seg decoder, clock. UMD for browser/Worker/Node.",
+  "main": "logic-engine.js",
+  "scripts": {
+    "test": "node tests/run-tests.js",
+    "test:engine": "node tests/logic-engine.test.js",
+    "test:viz": "node tests/viz.test.js",
+    "start": "npx http-server -p 5502 -c-1"
+  },
+  "keywords": ["digital-logic", "simulator", "propagate", "fixed-point", "oscillator", "gates", "truth-table", "7-seg", "UMD", "WebWorker", "canvas"],
+  "author": "Rahul Raj Singh",
+  "license": "MIT",
+  "type": "commonjs"
+}
